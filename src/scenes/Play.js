@@ -4,8 +4,11 @@ class Play extends Phaser.Scene{
     }
 
     create(){
+        const music = this.sound.add('bgm', { loop: true, volume: 0.4 });
+        music.play();
         // place tile sprite
-        this.starfield = this.add.tileSprite(0, 0, 640, 480, 'starfield').setOrigin(0, 0)
+        this.background = this.add.tileSprite(0, 0, 640, 480, 'background').setOrigin(0, 0)
+        this.foreground = this.add.tileSprite(0, 0, 640, 480, 'foreground').setOrigin(0, 0)
         // green UI background
         this.add.rectangle(0, borderUISize + borderPadding, game.config.width, borderUISize * 2, 0x00FF00).setOrigin(0, 0)
         // white borders
@@ -19,6 +22,7 @@ class Play extends Phaser.Scene{
         this.ship01 = new Spaceship(this, game.config.width + borderUISize*6, borderUISize*4, 'spaceship', 0, 30).setOrigin(0, 0)
         this.ship02 = new Spaceship(this, game.config.width + borderUISize*3, borderUISize*5 + borderPadding*2, 'spaceship', 0, 20).setOrigin(0,0)
         this.ship03 = new Spaceship(this, game.config.width, borderUISize*6 + borderPadding*4, 'spaceship', 0, 10).setOrigin(0,0)
+        this.special = new Specialship(this, game.config.width + borderUISize*3, borderUISize*7.5 + borderPadding*2, 'specialship', 0, 50).setOrigin(0,0)
         // define keys
         keyFIRE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F)
         keyRESET = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R)
@@ -50,6 +54,7 @@ class Play extends Phaser.Scene{
             this.add.text(game.config.width/2, game.config.height/2 + 64, 'Press (R) to Restart or ← for Menu', scoreConfig).setOrigin(0.5)
             this.gameOver = true
         }, null, this)
+
     }
 
     update() {
@@ -60,12 +65,14 @@ class Play extends Phaser.Scene{
         if (this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)) {
             this.scene.start("menuScene")
         }
-        this.starfield.tilePositionX -= 4
+        this.background.tilePositionX -= 4
+        this.foreground.tilePositionX -= 3
         if(!this.gameOver){
             this.p1Rocket.update()
             this.ship01.update()               // update spaceships (x3)
             this.ship02.update()
             this.ship03.update()
+            this.special.update()
         }
 
         // check collisions
@@ -80,6 +87,10 @@ class Play extends Phaser.Scene{
         if (this.checkCollision(this.p1Rocket, this.ship01)) {
             this.p1Rocket.reset()
             this.shipExplode(this.ship01)
+        }
+        if (this.checkCollision(this.p1Rocket, this.special)) {
+            this.p1Rocket.reset()
+            this.shipExplode(this.special)
         }
     }
 
@@ -110,6 +121,7 @@ class Play extends Phaser.Scene{
         // score add and text update
         this.p1Score += ship.points
         this.scoreLeft.text = this.p1Score
-        this.sound.play('sfx-explosion')
+        //this.sound.play('sfx-explosion')
+        this.sound.play('sfx-explosion' + Phaser.Math.Between(1, 4))
       }
 }
